@@ -1,4 +1,5 @@
 import { createCookieSessionStorage } from "react-router";
+import "dotenv/config";
 import type { User } from "~/models";
 
 type SessionData = {
@@ -12,9 +13,10 @@ type SessionFlashData = {
 const { getSession, commitSession, destroySession } =
   createCookieSessionStorage<SessionData, SessionFlashData>({
     cookie: {
+      secrets: [process.env.SESSION_SECRET!],
       name: "__session",
       httpOnly: true,
-      maxAge: 60,
+      maxAge: 60 * 60 * 24, // 1 day
       path: "/",
       sameSite: "lax",
       secure: true,
