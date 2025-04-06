@@ -1,0 +1,1 @@
+ALTER TABLE `clips_table` ADD `url` text NOT NULL;

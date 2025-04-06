@@ -9,6 +9,7 @@ export const users = sqliteTable("users_table", {
 
 export const clips = sqliteTable("clips_table", {
   id: int().primaryKey({ autoIncrement: true }),
+  url: text().notNull(),
   title: text().notNull(),
   description: text().notNull(),
   tags: text(),
