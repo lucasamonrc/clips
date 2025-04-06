@@ -11,6 +11,11 @@ export async function action({ request }: Route.ActionArgs) {
   const body = await request.json();
 
   console.log("body", body);
+
+  if (!!body.verification_token) {
+    return new Response();
+  }
+
   const notionKey = request.headers.get("X-Notion-Signature");
 
   if (!notionKey) {
