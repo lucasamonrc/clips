@@ -5,12 +5,10 @@ import { data, Link, redirect, useLoaderData, useFetcher } from "react-router";
 import { getSession } from "~/lib/sessions";
 import { clips } from "~/db/schema";
 import { db } from "~/db";
+import { Clip } from "~/components/clip";
 
 export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
-  ];
+  return [{ title: "My Clips" }, { name: "description", content: "My Clips" }];
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -51,16 +49,9 @@ export default function Home() {
         </div>
       </header>
       <main>
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 grid grid-cols-2 gap-4">
           {clips.map((clip) => (
-            <div key={clip.id}>
-              <h2 className="text-lg font-medium">{clip.title}</h2>
-              <p className="text-sm text-gray-500">{clip.description}</p>
-              <p className="text-sm text-gray-500">{clip.tags}</p>
-              <a href={clip.url} target="_blank" rel="noopener noreferrer">
-                {clip.url}
-              </a>
-            </div>
+            <Clip key={clip.id} clip={clip} />
           ))}
         </div>
       </main>
