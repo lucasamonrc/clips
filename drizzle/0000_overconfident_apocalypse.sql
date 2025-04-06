@@ -1,5 +1,6 @@
 CREATE TABLE `clips_table` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`url` text NOT NULL,
 	`title` text NOT NULL,
 	`description` text NOT NULL,
 	`tags` text,

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "47628619-fb0f-4b86-ae82-320a09bc11c2",
+  "id": "fa57b045-b339-406b-9fd3-7dd01bdca09d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "clips_table": {
@@ -13,6 +13,13 @@
           "primaryKey": true,
           "notNull": true,
           "autoincrement": true
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
         },
         "title": {
           "name": "title",
