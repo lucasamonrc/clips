@@ -32,15 +32,16 @@ export async function action({ request }: Route.ActionArgs) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  proccess(body.entity.id);
+  const page = await notion.pages.retrieve({ page_id: body.entity.id });
+  console.log(page);
+  const url = (page as any).properties.URL.url;
+
+  proccess(url);
 
   return new Response();
 }
 
-async function proccess(pageId: string) {
-  const page = await notion.pages.retrieve({ page_id: pageId });
-  const url = (page as any).properties.URL.url;
-
+async function proccess(url: string) {
   const [entry] = await db
     .select()
     .from(clips)
@@ -56,29 +57,52 @@ async function proccess(pageId: string) {
 
   const schema = z.object({
     title: z.string(),
-    summary: z.string().max(280),
+    summary: z.string(),
     labels: z.array(z.string()),
   });
 
-  // Feed this to the LLM
-  const result = await generateObject({
-    model: openai("gpt-4o-mini"),
-    schema,
-    prompt: `Generate a summary and labels for the following blog post/web page:
-    
-    <POST>
-    ${html}
-    </POST>
+  try {
+    const result = await generateObject({
+      model: openai("gpt-4o-mini"),
+      schema,
+      prompt: `Generate a summary and labels for the following blog post/web page:
+      
+      <POST>
+      ${html}
+      </POST>
+  
+      The summary should be a 1-2 sentences up to 280 characters, and only generate 1-2 labels that are relevant to the page. Also include the title of the page in the results. Never include commas (,) in the labels.
+      `,
+    });
 
-    The summary should be a 1-2 sentences and only generate 1-2 labels that are relevant to the page. Also include the title of the page in the results. Never include commas (,) in the labels.
-    `,
+    // insert into the database
+    await db.insert(clips).values({
+      url,
+      title: result.object.title,
+      description: result.object.summary,
+      tags: result.object.labels.join(",").toLowerCase(),
+    });
+  } catch (error) {
+    console.error("Skipping", url);
+    console.error((error as any).message);
+  }
+}
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const { results } = await notion.search({
+    query: "",
   });
 
-  // insert into the database
-  await db.insert(clips).values({
-    url,
-    title: result.object.title,
-    description: result.object.summary,
-    tags: result.object.labels.join(",").toLowerCase(),
-  });
+  const urls = results
+    .filter((result) => result.object === "page")
+    .map((result) => (result as any).properties?.URL?.url)
+    .filter((url) => url !== undefined);
+
+  Promise.all(
+    urls.map(async (url) => {
+      await proccess(url);
+    })
+  );
+
+  return new Response();
 }

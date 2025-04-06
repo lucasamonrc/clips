@@ -20,7 +20,7 @@ interface ClipPros {
 export function Clip({ clip }: ClipPros) {
   return (
     <a href={clip.url} target="_blank" className="group">
-      <Card className="group-hover:bg-gray-50 transition-colors duration-200">
+      <Card className="group-hover:bg-gray-50 transition-colors duration-200 h-full">
         <CardHeader>
           <CardTitle>{clip.title}</CardTitle>
           <CardDescription>{clip.tags?.split(",").join(", ")}</CardDescription>
