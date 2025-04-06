@@ -1,11 +1,12 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { notion } from "~/lib/notion";
 import type { Route } from "./+types/sync";
-import { generateObject, generateText } from "ai";
+import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 import { db } from "~/db";
 import { clips } from "~/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function action({ request }: Route.ActionArgs) {
   const body = await request.json();
@@ -27,8 +28,6 @@ export async function action({ request }: Route.ActionArgs) {
     Buffer.from(notionKey)
   );
 
-  console.log("isTrustedPayload", isTrustedPayload);
-
   if (!isTrustedPayload) {
     return new Response("Unauthorized", { status: 401 });
   }
@@ -41,6 +40,16 @@ export async function action({ request }: Route.ActionArgs) {
 async function proccess(pageId: string) {
   const page = await notion.pages.retrieve({ page_id: pageId });
   const url = (page as any).properties.URL.url;
+
+  const [entry] = await db
+    .select()
+    .from(clips)
+    .where(eq(clips.url, url))
+    .limit(1);
+
+  if (entry) {
+    return;
+  }
 
   const response = await fetch(url);
   const html = await response.text();
